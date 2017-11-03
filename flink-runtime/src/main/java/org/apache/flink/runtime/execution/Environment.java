@@ -35,6 +35,7 @@ import org.apache.flink.runtime.jobgraph.JobVertexID;
 import org.apache.flink.runtime.jobgraph.tasks.InputSplitProvider;
 import org.apache.flink.runtime.memory.MemoryManager;
 import org.apache.flink.runtime.metrics.groups.TaskMetricGroup;
+import org.apache.flink.runtime.query.KvStateClientProxy;
 import org.apache.flink.runtime.query.TaskKvStateRegistry;
 import org.apache.flink.runtime.state.internal.InternalKvState;
 import org.apache.flink.runtime.taskmanager.TaskManagerRuntimeInfo;
@@ -156,6 +157,9 @@ public interface Environment {
 	 * @return KvState registry
 	 */
 	TaskKvStateRegistry getTaskKvStateRegistry();
+
+	// AFFO-CHANGE
+	KvStateClientProxy getKvStateClientProxy();
 
 	/**
 	 * Confirms that the invokable has successfully completed all steps it needed to

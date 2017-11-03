@@ -21,23 +21,12 @@ package org.apache.flink.streaming.api.operators;
 import org.apache.flink.annotation.PublicEvolving;
 import org.apache.flink.api.common.accumulators.Accumulator;
 import org.apache.flink.api.common.functions.BroadcastVariableInitializer;
+import org.apache.flink.api.common.functions.GlobalStateClient;
 import org.apache.flink.api.common.functions.util.AbstractRuntimeUDFContext;
-import org.apache.flink.api.common.state.AggregatingState;
-import org.apache.flink.api.common.state.AggregatingStateDescriptor;
-import org.apache.flink.api.common.state.FoldingState;
-import org.apache.flink.api.common.state.FoldingStateDescriptor;
-import org.apache.flink.api.common.state.KeyedStateStore;
-import org.apache.flink.api.common.state.ListState;
-import org.apache.flink.api.common.state.ListStateDescriptor;
-import org.apache.flink.api.common.state.MapState;
-import org.apache.flink.api.common.state.MapStateDescriptor;
-import org.apache.flink.api.common.state.ReducingState;
-import org.apache.flink.api.common.state.ReducingStateDescriptor;
-import org.apache.flink.api.common.state.StateDescriptor;
-import org.apache.flink.api.common.state.ValueState;
-import org.apache.flink.api.common.state.ValueStateDescriptor;
+import org.apache.flink.api.common.state.*;
 import org.apache.flink.runtime.execution.Environment;
 import org.apache.flink.runtime.jobgraph.tasks.InputSplitProvider;
+import org.apache.flink.runtime.query.QueryableStateUtils;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.graph.StreamConfig;
 import org.apache.flink.streaming.runtime.tasks.ProcessingTimeService;
@@ -53,22 +42,26 @@ import java.util.Map;
 @PublicEvolving
 public class StreamingRuntimeContext extends AbstractRuntimeUDFContext {
 
-	/** The operator to which this function belongs. */
+	/**
+	 * The operator to which this function belongs.
+	 */
 	private final AbstractStreamOperator<?> operator;
 
-	/** The task environment running the operator. */
+	/**
+	 * The task environment running the operator.
+	 */
 	private final Environment taskEnvironment;
 
 	private final StreamConfig streamConfig;
 
 	public StreamingRuntimeContext(AbstractStreamOperator<?> operator,
-									Environment env, Map<String, Accumulator<?, ?>> accumulators) {
+								   Environment env, Map<String, Accumulator<?, ?>> accumulators) {
 		super(env.getTaskInfo(),
-				env.getUserClassLoader(),
-				operator.getExecutionConfig(),
-				accumulators,
-				env.getDistributedCacheEntries(),
-				operator.getMetricGroup());
+			env.getUserClassLoader(),
+			operator.getExecutionConfig(),
+			accumulators,
+			env.getDistributedCacheEntries(),
+			operator.getMetricGroup());
 
 		this.operator = operator;
 		this.taskEnvironment = env;
@@ -153,6 +146,14 @@ public class StreamingRuntimeContext extends AbstractRuntimeUDFContext {
 		KeyedStateStore keyedStateStore = checkPreconditionsAndGetKeyedStateStore(stateProperties);
 		stateProperties.initializeSerializerUnlessSet(getExecutionConfig());
 		return keyedStateStore.getMapState(stateProperties);
+	}
+
+	// AFFO-CHANGE
+	@Override
+	public GlobalStateClient getGlobalStateClient() {
+		int numQueryThreads = getMaxNumberOfParallelSubtasks();
+		return QueryableStateUtils.createGlobalStateClient(
+			getExecutionConfig(), taskEnvironment.getJobID(), taskEnvironment.getKvStateClientProxy(), numQueryThreads);
 	}
 
 	private KeyedStateStore checkPreconditionsAndGetKeyedStateStore(StateDescriptor<?, ?> stateDescriptor) {

@@ -486,4 +486,7 @@ public interface RuntimeContext {
 	 */
 	@PublicEvolving
 	<UK, UV> MapState<UK, UV> getMapState(MapStateDescriptor<UK, UV> stateProperties);
+
+	// AFFO-CHANGE accessor for global state gateway
+	GlobalStateClient getGlobalStateClient();
 }

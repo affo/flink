@@ -50,6 +50,7 @@ import org.apache.flink.runtime.operators.testutils.MockInputSplitProvider;
 import org.apache.flink.runtime.operators.testutils.UnregisteredTaskMetricsGroup;
 import org.apache.flink.runtime.plugable.DeserializationDelegate;
 import org.apache.flink.runtime.plugable.NonReusingDeserializationDelegate;
+import org.apache.flink.runtime.query.KvStateClientProxy;
 import org.apache.flink.runtime.query.KvStateRegistry;
 import org.apache.flink.runtime.query.TaskKvStateRegistry;
 import org.apache.flink.runtime.taskmanager.TaskManagerRuntimeInfo;
@@ -326,6 +327,12 @@ public class StreamMockEnvironment implements Environment {
 	@Override
 	public TaskKvStateRegistry getTaskKvStateRegistry() {
 		return kvStateRegistry;
+	}
+
+	@Override
+	public KvStateClientProxy getKvStateClientProxy() {
+		// TODO implement AFFO-CHANGE
+		return null;
 	}
 
 	@Override

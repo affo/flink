@@ -28,6 +28,7 @@ import org.apache.flink.api.common.accumulators.Histogram;
 import org.apache.flink.api.common.accumulators.IntCounter;
 import org.apache.flink.api.common.accumulators.LongCounter;
 import org.apache.flink.api.common.cache.DistributedCache;
+import org.apache.flink.api.common.functions.GlobalStateClient;
 import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.api.common.state.AggregatingState;
 import org.apache.flink.api.common.state.AggregatingStateDescriptor;
@@ -237,5 +238,12 @@ public abstract class AbstractRuntimeUDFContext implements RuntimeContext {
 	public <UK, UV> MapState<UK, UV> getMapState(MapStateDescriptor<UK, UV> stateProperties) {
 		throw new UnsupportedOperationException(
 				"This state is only accessible by functions executed on a KeyedStream");
+	}
+
+	// AFFO-CHANGE
+	@Override
+	public GlobalStateClient getGlobalStateClient() {
+		throw new UnsupportedOperationException(
+			"Available only for StreamingRuntimeContext...");
 	}
 }

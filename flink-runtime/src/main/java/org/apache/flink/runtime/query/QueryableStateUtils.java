@@ -18,9 +18,11 @@
 
 package org.apache.flink.runtime.query;
 
+import org.apache.flink.api.common.ExecutionConfig;
+import org.apache.flink.api.common.JobID;
+import org.apache.flink.api.common.functions.GlobalStateClient;
 import org.apache.flink.queryablestate.network.stats.KvStateRequestStats;
 import org.apache.flink.util.Preconditions;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,21 +42,21 @@ public final class QueryableStateUtils {
 	 * Initializes the {@link KvStateClientProxy client proxy} responsible for
 	 * receiving requests from the external (to the cluster) client and forwarding them internally.
 	 *
-	 * @param address the address to bind to.
-	 * @param ports the range of ports the proxy will attempt to listen to
-	 *                 (see {@link org.apache.flink.configuration.QueryableStateOptions#PROXY_PORT_RANGE
-	 *                 QueryableStateOptions.PROXY_PORT_RANGE}).
+	 * @param address          the address to bind to.
+	 * @param ports            the range of ports the proxy will attempt to listen to
+	 *                         (see {@link org.apache.flink.configuration.QueryableStateOptions#PROXY_PORT_RANGE
+	 *                         QueryableStateOptions.PROXY_PORT_RANGE}).
 	 * @param eventLoopThreads the number of threads to be used to process incoming requests.
-	 * @param queryThreads the number of threads to be used to send the actual state.
-	 * @param stats statistics to be gathered about the incoming requests.
+	 * @param queryThreads     the number of threads to be used to send the actual state.
+	 * @param stats            statistics to be gathered about the incoming requests.
 	 * @return the {@link KvStateClientProxy client proxy}.
 	 */
 	public static KvStateClientProxy createKvStateClientProxy(
-			final InetAddress address,
-			final Iterator<Integer> ports,
-			final int eventLoopThreads,
-			final int queryThreads,
-			final KvStateRequestStats stats) {
+		final InetAddress address,
+		final Iterator<Integer> ports,
+		final int eventLoopThreads,
+		final int queryThreads,
+		final KvStateRequestStats stats) {
 
 		Preconditions.checkNotNull(address, "address");
 		Preconditions.checkNotNull(stats, "stats");
@@ -66,16 +68,16 @@ public final class QueryableStateUtils {
 			String classname = "org.apache.flink.queryablestate.client.proxy.KvStateClientProxyImpl";
 			Class<? extends KvStateClientProxy> clazz = Class.forName(classname).asSubclass(KvStateClientProxy.class);
 			Constructor<? extends KvStateClientProxy> constructor = clazz.getConstructor(
-					InetAddress.class,
-					Iterator.class,
-					Integer.class,
-					Integer.class,
-					KvStateRequestStats.class);
+				InetAddress.class,
+				Iterator.class,
+				Integer.class,
+				Integer.class,
+				KvStateRequestStats.class);
 			return constructor.newInstance(address, ports, eventLoopThreads, queryThreads, stats);
 		} catch (ClassNotFoundException e) {
 			LOG.warn("Could not load Queryable State Client Proxy. " +
-					"Probable reason: flink-queryable-state-runtime is not in the classpath. " +
-					"Please put the corresponding jar from the opt to the lib folder.");
+				"Probable reason: flink-queryable-state-runtime is not in the classpath. " +
+				"Please put the corresponding jar from the opt to the lib folder.");
 			LOG.debug("Caught exception", e);
 			return null;
 		} catch (InvocationTargetException e) {
@@ -91,23 +93,23 @@ public final class QueryableStateUtils {
 	 * Initializes the {@link KvStateServer server} responsible for sending the
 	 * requested internal state to the {@link KvStateClientProxy client proxy}.
 	 *
-	 * @param address the address to bind to.
-	 * @param ports the range of ports the state server will attempt to listen to
-	 *                 (see {@link org.apache.flink.configuration.QueryableStateOptions#SERVER_PORT_RANGE
-	 *                 QueryableStateOptions.SERVER_PORT_RANGE}).
+	 * @param address          the address to bind to.
+	 * @param ports            the range of ports the state server will attempt to listen to
+	 *                         (see {@link org.apache.flink.configuration.QueryableStateOptions#SERVER_PORT_RANGE
+	 *                         QueryableStateOptions.SERVER_PORT_RANGE}).
 	 * @param eventLoopThreads the number of threads to be used to process incoming requests.
-	 * @param queryThreads the number of threads to be used to send the actual state.
-	 * @param kvStateRegistry the registry with the queryable state.
-	 * @param stats statistics to be gathered about the incoming requests.
+	 * @param queryThreads     the number of threads to be used to send the actual state.
+	 * @param kvStateRegistry  the registry with the queryable state.
+	 * @param stats            statistics to be gathered about the incoming requests.
 	 * @return the {@link KvStateServer state server}.
 	 */
 	public static KvStateServer createKvStateServer(
-			final InetAddress address,
-			final Iterator<Integer> ports,
-			final int eventLoopThreads,
-			final int queryThreads,
-			final KvStateRegistry kvStateRegistry,
-			final KvStateRequestStats stats) {
+		final InetAddress address,
+		final Iterator<Integer> ports,
+		final int eventLoopThreads,
+		final int queryThreads,
+		final KvStateRegistry kvStateRegistry,
+		final KvStateRequestStats stats) {
 
 		Preconditions.checkNotNull(address, "address");
 		Preconditions.checkNotNull(kvStateRegistry, "registry");
@@ -120,17 +122,17 @@ public final class QueryableStateUtils {
 			String classname = "org.apache.flink.queryablestate.server.KvStateServerImpl";
 			Class<? extends KvStateServer> clazz = Class.forName(classname).asSubclass(KvStateServer.class);
 			Constructor<? extends KvStateServer> constructor = clazz.getConstructor(
-					InetAddress.class,
-					Iterator.class,
-					Integer.class,
-					Integer.class,
-					KvStateRegistry.class,
-					KvStateRequestStats.class);
+				InetAddress.class,
+				Iterator.class,
+				Integer.class,
+				Integer.class,
+				KvStateRegistry.class,
+				KvStateRequestStats.class);
 			return constructor.newInstance(address, ports, eventLoopThreads, queryThreads, kvStateRegistry, stats);
 		} catch (ClassNotFoundException e) {
 			LOG.warn("Could not load Queryable State Server. " +
-					"Probable reason: flink-queryable-state-runtime is not in the classpath. " +
-					"Please put the corresponding jar from the opt to the lib folder.");
+				"Probable reason: flink-queryable-state-runtime is not in the classpath. " +
+				"Please put the corresponding jar from the opt to the lib folder.");
 			LOG.debug("Caught exception", e);
 			return null;
 		} catch (InvocationTargetException e) {
@@ -138,6 +140,43 @@ public final class QueryableStateUtils {
 			return null;
 		} catch (Throwable t) {
 			LOG.error("Failed to instantiate the Queryable State Server.", t);
+			return null;
+		}
+	}
+
+	/**
+	 * AFFO-CHANGE
+	 * Creates a GlobalStateClient for operator's use for programmatically sending state requests to other operators.
+	 *
+	 *
+	 * @param executionConfig
+	 * @param jobID
+	 * @param proxy           the proxy used by the client to send requests
+	 * @param numQueryThreads the number of threads used for querying
+	 * @return
+	 */
+	public static GlobalStateClient createGlobalStateClient(
+		ExecutionConfig executionConfig, JobID jobID, KvStateClientProxy proxy, int numQueryThreads) {
+		Preconditions.checkNotNull(proxy, "proxy");
+		Preconditions.checkArgument(numQueryThreads >= 1);
+
+		try {
+			String classname = "org.apache.flink.queryablestate.server.GlobalStateGateway";
+			Class<? extends GlobalStateClient> clazz = Class.forName(classname).asSubclass(GlobalStateClient.class);
+			Constructor<? extends GlobalStateClient> constructor = clazz.getConstructor(
+				ExecutionConfig.class, JobID.class, KvStateClientProxy.class, int.class);
+			return constructor.newInstance(executionConfig, jobID, proxy, numQueryThreads);
+		} catch (ClassNotFoundException e) {
+			LOG.warn("Could not load Global State Client. " +
+				"Probable reason: flink-queryable-state-runtime is not in the classpath. " +
+				"Please put the corresponding jar from the opt to the lib folder.");
+			LOG.debug("Caught exception", e);
+			return null;
+		} catch (InvocationTargetException e) {
+			LOG.error("Global State Client could not be created: ", e.getTargetException());
+			return null;
+		} catch (Throwable t) {
+			LOG.error("Failed to instantiate the Global State Client.", t);
 			return null;
 		}
 	}

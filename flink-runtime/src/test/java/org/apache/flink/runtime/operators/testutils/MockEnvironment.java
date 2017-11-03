@@ -44,6 +44,7 @@ import org.apache.flink.runtime.jobgraph.JobVertexID;
 import org.apache.flink.runtime.jobgraph.tasks.InputSplitProvider;
 import org.apache.flink.runtime.memory.MemoryManager;
 import org.apache.flink.runtime.metrics.groups.TaskMetricGroup;
+import org.apache.flink.runtime.query.KvStateClientProxy;
 import org.apache.flink.runtime.query.KvStateRegistry;
 import org.apache.flink.runtime.query.TaskKvStateRegistry;
 import org.apache.flink.runtime.taskmanager.TaskManagerRuntimeInfo;
@@ -346,6 +347,12 @@ public class MockEnvironment implements Environment {
 	@Override
 	public TaskKvStateRegistry getTaskKvStateRegistry() {
 		return kvStateRegistry;
+	}
+
+	@Override
+	public KvStateClientProxy getKvStateClientProxy() {
+		// TODO implement AFFO-CHANGE
+		return null;
 	}
 
 	@Override

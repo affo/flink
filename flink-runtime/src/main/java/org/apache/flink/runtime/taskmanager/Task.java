@@ -68,6 +68,7 @@ import org.apache.flink.runtime.jobgraph.tasks.StoppableTask;
 import org.apache.flink.runtime.jobmanager.PartitionProducerDisposedException;
 import org.apache.flink.runtime.memory.MemoryManager;
 import org.apache.flink.runtime.metrics.groups.TaskMetricGroup;
+import org.apache.flink.runtime.query.KvStateClientProxy;
 import org.apache.flink.runtime.query.TaskKvStateRegistry;
 import org.apache.flink.util.ExceptionUtils;
 import org.apache.flink.util.Preconditions;
@@ -464,6 +465,11 @@ public class Task implements Runnable, TaskActions {
 
 	public Thread getExecutingThread() {
 		return executingThread;
+	}
+
+	// AFFO-CHANGE
+	public KvStateClientProxy getKvStateClientProxy() {
+		return network.getKvStateProxy();
 	}
 
 	@VisibleForTesting

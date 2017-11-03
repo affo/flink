@@ -37,6 +37,8 @@ under the License.
 	<modules>
 		<module>flink-queryable-state-runtime</module>
 		<module>flink-queryable-state-client-java</module>
+		<module>flink-state-sharing</module>
+		<module>flink-state-sharing-examples</module>
 		<!-- <module>flink-state-client-scala</module>-->
 	</modules>
 
@@ -44,7 +46,8 @@ under the License.
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<scope>provided</scope>
+			<!-- TODO reset to provided! -->
+			<!-- <scope>provided</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.findbugs</groupId>
